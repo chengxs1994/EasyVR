@@ -1,0 +1,20 @@
+/* 译文节点不改变已有 flex / grid 的布局层级。 */
+span[data-ui] { display: contents; }
+.global-tools { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-left: auto; }
+.global-tools .github-link { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; padding: 0; border: 1px solid #3c3b42; border-radius: 6px; background: #222126; color: #eeeaf4; }
+.global-tools .github-link:hover { background: #372346; border-color: #9c70ce; }
+.global-tools .language-control { display: flex; flex-direction: row; align-items: center; gap: 5px; margin: 0; color: #d8d3df; }
+.global-tools select { width: auto; min-width: 88px; height: 34px; padding: 0 5px; border: 1px solid #3c3b42; border-radius: 6px; background: #222126; color: #f2edf7; font: 12px system-ui, sans-serif; }
+.global-tools :is(a,select):focus-visible { outline: 2px solid #ba91ee; outline-offset: 3px; }
+.wb-topbar > .wb-local { margin-left: auto; }
+.wb-topbar > .global-tools { margin-left: 16px; }
+.app-header .project-heading { min-width: 100px; flex-shrink: 1; }
+.app-header .header-actions { flex-shrink: 0; }
+html[lang="en"] .wb-sidebar { font-size: 12px; }
+html[lang="en"] .wb-nav button { white-space: normal; }
+html[lang="en"] .pano-app > header { flex-wrap: wrap; height: auto; min-height: 62px; padding-block: 10px; gap: 12px; }
+@media (max-width: 1200px) {
+ .app-header { flex-wrap: wrap; height: auto; min-height: 60px; gap: 6px; }
+ .app-header .header-actions { flex-wrap: wrap; }
+ .wb-local { display: none; }
+}

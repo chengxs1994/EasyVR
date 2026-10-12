@@ -1,0 +1,18 @@
+/* 导演台延续深紫控制面板，舞台使用中性明亮底色，以角色和设备区分重点。 */
+.director-tools { margin-left:auto; gap:8px; }
+.director-tools select,.director-tools button { font-size:12px; padding:7px 10px; }
+.director-object-code { display:block; margin-top:3px; font-size:9px; color:#a99bb9; letter-spacing:.04em; }
+#camera-transform p { color:#bdb3c8; font-size:11px; line-height:1.7; }
+.director-plot-preview { max-height:64vh; overflow:auto; background:#faf9fc; border-radius:8px; }
+.director-plot-preview svg { display:block; width:100%; height:auto; min-width:600px; }
+dialog:has(.director-plot-preview) { width:min(1180px,94vw); max-width:94vw; }
+.templates { grid-template-columns:repeat(2,1fr); }
+.viewport .view-tag,.viewport .viewport-note { color:#342b40; text-shadow:0 1px 3px #fff9; }
+@media(max-width:1100px) { .viewport-toolbar { flex-wrap:wrap; height:auto; min-height:54px; gap:8px; } .director-tools { margin-left:0; } }
+
+/* 姿势输入沿用暗色属性面板；动作与走位在同一人物行内上下分层。 */
+.motion-panel select { width:100%; margin:6px 0 10px; padding:7px; background:#242327; color:#eee; border:1px solid #48434f; border-radius:5px; }
+.track-row:has(.action-track) > .clip { height:13px; top:1px; font-size:9px; }
+.action-track { position:absolute; left:0; right:0; bottom:0; height:15px; }
+.action-track .clip { top:0; height:14px; font-size:10px; }
+.track-row:has(.action-track) > .empty-track { display:none; }
