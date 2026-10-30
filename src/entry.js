@@ -5,7 +5,8 @@ initializeI18n();
 async function start() {
   try {
     const params = new URLSearchParams(location.search);
-    if (params.get('tour') === 'home') await import('./panorama/home-view.js');
+    if (params.get('tour') === 'ai-demo') await (await import('./tour/index.js')).ready;
+    else if (params.get('tour') === 'home') await import('./panorama/home-view.js');
     else if (params.has('editor')) await import('./main.js');
     else await import('./panorama/index.js');
     refreshTitle();

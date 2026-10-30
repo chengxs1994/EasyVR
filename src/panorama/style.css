@@ -505,14 +505,15 @@ canvas:active {
   font-size: 10px;
   flex-shrink: 0;
 }
-#render-host {
-  transition: opacity 0.2s;
+/* 推进只缩放旧画面快照，目标画面保持完整亮度；交互在切换后恢复。 */
+#render-host > .scene-transition {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  will-change: opacity, transform;
 }
-.traveling #render-host {
-  opacity: 0.35;
-}
-@media (prefers-reduced-motion: reduce) {
-  #render-host {
-    transition: none;
-  }
-}
+.traveling #hotspots { visibility: hidden; }
+.traveling #render-host { pointer-events: none; }

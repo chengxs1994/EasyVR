@@ -1,0 +1,43 @@
+
+  <div id="viewport" aria-label="全景画面"></div>
+  <div id="hotspots" aria-label="场景跳转热点" hidden></div>
+  <header><a class="brand" href="/" aria-label="EasyVR 首页"><span class="brand-mark">⬡</span> EasyVR <small>空间漫游</small></a><div class="head-right"><a class="tour-workspace" href="/?panorama=1">取景器 ↗</a><a class="tour-workspace" href="/?editor=1">空间推演 ↗</a><span class="live-dot"></span><span id="connection">正在加载</span><button id="editor-toggle" aria-expanded="false" aria-controls="editor">＋ 自訂點位</button><button id="fullscreen" title="全屏浏览" aria-label="全屏浏览">⛶</button></div></header>
+  <section class="scene-title"><p>AI 场景 / 空间漫游</p><h1>光落在客厅。</h1><span><b id="scene-name">客厅</b> <i>·</i> 360° 环视 <small class="route-note">示意路线 · 点击圆环前往</small></span></section>
+  <div id="loading" role="status"><span class="spinner"></span><h2 id="loading-title">走进这个空间</h2><p>正在读取全景素材…</p></div>
+  <div id="error" role="alert" hidden><h2>场景暂时无法加载</h2><p id="error-text"></p><button id="retry">重新加载</button></div>
+  <div class="crosshair" aria-hidden="true"></div>
+  <aside class="orientation" aria-label="当前视角"><span id="heading">000°</span><div class="compass"><i id="needle"></i><span>F</span></div><small id="fov-value">65° 视野</small></aside>
+  <nav class="face-nav" aria-label="查看方向"><span class="face-label">看向</span><button data-face="f" title="前方" aria-label="看向前方">前</button><button data-face="r" title="右方" aria-label="看向右方">右</button><button data-face="b" title="后方" aria-label="看向后方">后</button><button data-face="l" title="左方" aria-label="看向左方">左</button><button data-face="u" title="上方" aria-label="看向上方">上</button><button data-face="d" title="下方" aria-label="看向下方">下</button></nav>
+  <nav id="scene-nav" aria-label="切换点位"></nav>
+  <footer><div class="scene-card"><img id="scene-card-image" src="/panoramas/ai-tour/living-room-pano-detail-v2.png" alt="客厅前方预览"><div><small id="scene-card-label">01 / LIVING ROOM</small><strong id="scene-card-name">客厅</strong><span>2 个机位 · 双向漫游</span></div></div><div class="controls"><button id="rotate" aria-pressed="false" title="自动环视">↻ <span>自动环视</span></button><span class="divider"></span><button id="out" aria-label="缩小" title="缩小">−</button><button id="reset" title="回到初始视角" aria-label="重置视角">⌾</button><button id="in" aria-label="放大" title="放大">＋</button><span class="divider"></span><button id="capture" class="capture">保存取景 <span>↗</span></button></div><p class="hint">拖动探索空间 <span>·</span> 滚轮 / 双指缩放</p></footer>
+  <section id="editor" aria-label="热点编辑器" hidden>
+    <div class="editor-heading"><strong>自定义点位 · <span id="editor-source"></span></strong><button id="editor-close" class="primary" aria-label="完成編輯，開始漫遊">完成編輯</button></div>
+    <p><strong>編輯模式：點擊圓環會選取點位，不會跳轉。</strong>先儲存修改，再點「完成編輯・開始漫遊」即可測試跳轉。點位設定僅保存在本機。</p>
+    <section class="scene-view-settings"><strong>房间默认进入视角</strong><p>拖动全景、调整缩放后保存。首次打开和底部切换使用此视角；圆环入口的切入机位独立设置。</p><small id="scene-view-summary"></small><div class="editor-actions"><button id="scene-view-save" class="primary">将当前画面设为默认</button><button id="scene-view-preview">查看默认视角</button></div></section>
+    <div class="editor-actions"><button id="undo" disabled>↶ 撤销</button><button id="redo" disabled>↷ 重做</button></div><p>编辑时可直接拖动圆环或信息点；撤销仅针对已保存操作。</p><label for="hotspot-list">选择热点<select id="hotspot-list"></select></label>
+    <form id="hotspot-form">
+      <label>点位名称<input id="hotspot-label" maxlength="24" placeholder="例如：走进餐厅（默认用目标房间名）"></label>
+      <div class="editor-grid"><label>点位样式<select id="hotspot-style"><option value="ring">贴地圆环</option><option value="arrow">方向箭头</option></select></label><label>颜色<input id="hotspot-color" type="color" value="#ffffff"></label></div>
+      <label>大小（24–80）<input id="hotspot-size" type="number" min="24" max="80" value="42" required></label>
+      <button id="pick-position" type="button" class="primary">在画面上选位置</button>
+      <label for="hotspot-target">目标房间<select id="hotspot-target"></select></label>
+      <div class="editor-grid"><label>位置方向 °<input id="yaw" type="number" min="0" max="360" step="0.1" value="0" required></label><label>位置俯仰 °<input id="pitch" type="number" min="-89" max="89" step="0.1" value="0" required></label></div>
+      <button id="locate-hotspot" type="button">看向此点位</button> <button id="use-center" type="button">取画面中心位置</button>
+      <div class="editor-grid"><label>进入方向 °<input id="entryYaw" type="number" min="0" max="360" step="0.1" value="0" required></label><label>进入俯仰 °<input id="entryPitch" type="number" min="-89" max="89" step="0.1" value="0" required></label></div>
+      <label>切入视野 °（越小越近）<input id="entryFov" type="number" min="25" max="95" step="0.1" value="65" required></label>
+      <button id="preview-entry" type="button" class="primary">进入目标房间设置机位</button>
+      <p>方向：0 前 / 90 右 / 180 后 / 270 左；俯仰正值向上。热点跳转使用此进入视角。</p>
+      <div class="editor-actions"><button type="submit" class="primary">保存热点</button><button id="hotspot-copy" type="button">复制为草稿</button><button id="hotspot-return" type="button">配置返回入口</button><button id="hotspot-delete" type="button">删除所选</button></div>
+    </form>
+    <details id="info-section"><summary>房间信息标签</summary><p>仅填写已核实的信息，不自动推断面积、采光或设备参数。</p>
+      <label>选择信息标签<select id="info-list"></select></label>
+      <form id="info-form"><label>标签名称<input id="info-title" maxlength="40" required placeholder="例如：窗户、收纳空间"></label><label>说明<textarea id="info-body" rows="3" maxlength="1000" placeholder="填写已核实的说明"></textarea></label>
+      <div class="editor-grid"><label>标签方向 °<input id="info-yaw" type="number" min="0" max="360" step="0.1" value="0" required></label><label>标签俯仰 °<input id="info-pitch" type="number" min="-89" max="89" step="0.1" value="0" required></label></div>
+      <button id="info-pick" type="button">在画面上定位标签</button><div class="editor-actions"><button class="primary" type="submit">保存信息标签</button><button id="info-delete" type="button" disabled>删除信息标签</button></div></form>
+    </details>
+    <details><summary>配置导入 / 导出</summary><p>导入会替换本房源全部热点，可先导出备份。</p><label>路线 JSON<textarea id="route-json" rows="4" placeholder="粘贴导出的配置"></textarea></label><div class="editor-actions"><button id="route-export">导出配置</button><button id="route-import">导入并替换</button></div></details>
+  </section>
+  <div id="entry-preview" hidden role="region" aria-label="切入机位预览"><strong>设置切入机位 · <span id="entry-preview-name"></span></strong><p>拖动调整朝向，滚轮或底部加减调整远近。拍摄位置固定。</p><button id="entry-apply">采用当前机位并返回</button><button id="entry-cancel">取消并返回</button></div>
+  <div id="placement-help" hidden role="status">点击地面放置点位 <button id="cancel-placement">取消</button></div>
+<dialog id="info-dialog"><button id="info-close" aria-label="关闭信息">×</button><small>房间信息 · 人工标注</small><h2 id="info-title-view"></h2><p id="info-body-view"></p></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>

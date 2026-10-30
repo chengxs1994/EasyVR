@@ -326,7 +326,7 @@ export class Stage {
     this.camera.position.fromArray(panoramaEye(this.project));
     this.controls.target.fromArray(project.camera.target);
     this.controls.update();
-    new THREE.TextureLoader().load(project.environment.panorama === 'canvas-panorama' ? project.environment.panoramaImage : '/panoramas/residential-living-room.jpg', texture => {
+    new THREE.TextureLoader().load(project.environment.panorama === 'canvas-panorama' ? project.environment.panoramaImage : '/panoramas/ai-living-room.png', texture => {
       if (!this.running || this.panoramaKey !== key) { texture.dispose(); return; }
       texture.colorSpace = THREE.SRGBColorSpace;
       texture.mapping = THREE.EquirectangularReflectionMapping;

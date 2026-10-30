@@ -55,7 +55,7 @@ function localizeTree(root) {
 /** 各独立页面使用当前语言的标题，不把项目名称混入翻译词典。 */
 export function refreshTitle() {
   const params = new URLSearchParams(location.search);
-  const key = params.has('editor') ? '空间推演' : params.get('tour') === 'home' ? '住宅实景' : params.has('panorama') ? '全景场景取景器' : '全景场景取景器';
+  const key = params.has('editor') ? '空间推演' : ['home', 'ai-demo'].includes(params.get('tour')) ? 'AI 住宅全景' : params.has('panorama') ? '全景场景取景器' : '全景场景取景器';
   document.title = `EasyVR · ${translate(key)}`;
 }
 /** 原位切换界面语言，保留未保存输入、焦点、机位和预演状态。 */

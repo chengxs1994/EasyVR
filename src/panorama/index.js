@@ -4,10 +4,12 @@ import { createScene, restoreTour, removeScene } from './tour.js';
 import { PanoramaViewer, demoPanorama } from './viewer.js';
 import { normalizeView, fitFrame, frameSize } from './model.js';
 import { openPanoramaStore } from './store.js';
+import { approachHotspot } from '../tour/travel.js';
+import { createSceneTransition } from '../tour/transition.js';
 
 const root = document.getElementById('app');
 document.title = '全景场景取景器 · EasyVR';
-root.innerHTML = `<div class="pano-app"><header><a href="/" class="pano-brand">EasyVR <small><span data-ui="全景">全景</span></small></a><span class="pano-divider"></span><strong><span data-ui="全景场景取景器">全景场景取景器</span></strong><span class="pano-tag"><span data-ui="独立模块">独立模块</span></span><a href="/?tour=home"><span data-ui="住宅实景全屏浏览 ↗">住宅实景全屏浏览 ↗</span></a><a href="/?editor=1&backdrop=home"><span data-ui="住宅实景空间推演 ↗">住宅实景空间推演 ↗</span></a><span id="save-state"><span data-ui="正在读取本机存档">正在读取本机存档</span></span><a href="/"><span data-ui="全景首页 ↗">全景首页 ↗</span></a></header><div class="pano-layout"><aside class="pano-settings"><p class="eyebrow"><span data-ui="01 / 场景素材">01 / 场景素材</span></p><h1><span data-ui="换一个角度">换一个角度</span><br><span data-ui="发现下一个镜头。">发现下一个镜头。</span></h1><label class="upload-area"><span data-ui="＋ 添加全景位置">＋ 添加全景位置</span><input id="upload" type="file" accept="image/png,image/jpeg,image/webp" hidden><small><span data-ui="PNG / JPG / WebP · 最大 30 MB">PNG / JPG / WebP · 最大 30 MB</span></small></label><label><span data-ui="当前位置">当前位置</span><select id="scene-select"></select></label><input id="scene-name" aria-label="位置名称" data-ui-aria-label="位置名称" maxlength="60"><button id="delete-scene"><span data-ui="删除此位置">删除此位置</span></button><strong id="source-name"><span data-ui="方位演示全景">方位演示全景</span></strong><p class="muted" id="source-info"><span data-ui="建议使用 2:1 等距柱状全景图。">建议使用 2:1 等距柱状全景图。</span></p><button id="demo"><span data-ui="添加演示位置">添加演示位置</span></button><hr><p class="eyebrow"><span data-ui="位置连接 / 漫游热点">位置连接 / 漫游热点</span></p><label><span data-ui="前往位置">前往位置</span><select id="target-scene"></select></label><button id="add-hotspot"><span data-ui="＋ 在画面中心添加热点">＋ 在画面中心添加热点</span></button><button id="arrival"><span data-ui="设为此位置的到达视角">设为此位置的到达视角</span></button><p class="muted"><span data-ui="先对准门口或通道，再添加热点。点击画面中的箭头即可前往。">先对准门口或通道，再添加热点。点击画面中的箭头即可前往。</span></p><div id="hotspot-list"></div><hr><p class="eyebrow"><span data-ui="02 / 取景参数">02 / 取景参数</span></p><label><span data-ui="输出画幅">输出画幅</span><select id="ratio"><option>16:9</option><option>9:16</option><option>3:4</option><option>1:1</option></select></label><label><span data-ui="水平角度">水平角度 </span><output id="yaw-value"></output><input id="yaw" type="range" min="0" max="359" step="1"></label><label><span data-ui="俯仰角度">俯仰角度 </span><output id="pitch-value"></output><input id="pitch" type="range" min="-85" max="85" step="1"></label><label><span data-ui="垂直视野">垂直视野 </span><output id="fov-value"></output><input id="fov" type="range" min="20" max="100" step="1"></label><button id="reset"><span data-ui="重置视角">重置视角</span></button><label class="check"><input id="guides" type="checkbox" checked><span data-ui="显示三分构图线">显示三分构图线</span></label><hr><p class="eyebrow"><span data-ui="03 / 输出画面">03 / 输出画面</span></p><label><span data-ui="输出长边">输出长边</span><select id="resolution"><option value="1920">1920 px</option><option value="3840">3840 px</option></select></label><p class="muted"><span data-ui="高分辨率导出不会增加原图细节。取景图片不包含辅助线。">高分辨率导出不会增加原图细节。取景图片不包含辅助线。</span></p></aside><main class="pano-stage"><div class="stage-top"><button id="demo-tour"><span data-ui="体验三点漫游">体验三点漫游</span></button><span><i></i><span data-ui="PANORAMA / 环视取景"> PANORAMA / 环视取景</span></span><span id="frame-spec">16:9</span></div><div id="viewport"><div id="frame"><div id="render-host"></div><div id="hotspots"></div><div id="grid"><i></i><i></i><i></i><i></i></div><span class="frame-corner tl"></span><span class="frame-corner tr"></span><span class="frame-corner bl"></span><span class="frame-corner br"></span></div></div><div class="stage-bottom"><p><span data-ui="拖拽环视 · 滚轮变焦 · 聚焦画面后方向键微调">拖拽环视 · 滚轮变焦 · 聚焦画面后方向键微调</span></p><div><button id="download"><span data-ui="导出当前画面">导出当前画面</span></button><button id="capture" class="primary"><span data-ui="＋ 保存取景">＋ 保存取景</span></button></div></div><p id="message" role="status"><span data-ui="图片仅保存在本机浏览器，不会上传至服务器。">图片仅保存在本机浏览器，不会上传至服务器。</span></p></main><aside class="pano-library"><div class="library-heading"><div><p class="eyebrow">SHOT COLLECTION</p><h2><span data-ui="取景库">取景库 </span><span id="count">00</span></h2></div></div><p class="muted"><span data-ui="点击画面恢复角度。最多保存 20 个取景。">点击画面恢复角度。最多保存 20 个取景。</span></p><div id="shots"></div></aside></div></div>`;
+root.innerHTML = `<div class="pano-app"><header><a href="/" class="pano-brand">EasyVR <small><span data-ui="全景">全景</span></small></a><span class="pano-divider"></span><strong><span data-ui="全景场景取景器">全景场景取景器</span></strong><span class="pano-tag"><span data-ui="独立模块">独立模块</span></span><a href="/?tour=ai-demo">AI 双点漫游 ↗</a><a href="/?tour=home"><span data-ui="AI 住宅全景全屏浏览 ↗">AI 住宅全景全屏浏览 ↗</span></a><a href="/?editor=1&backdrop=home"><span data-ui="AI 住宅全景空间推演 ↗">AI 住宅全景空间推演 ↗</span></a><span id="save-state"><span data-ui="正在读取本机存档">正在读取本机存档</span></span><a href="/"><span data-ui="全景首页 ↗">全景首页 ↗</span></a></header><div class="pano-layout"><aside class="pano-settings"><p class="eyebrow"><span data-ui="01 / 场景素材">01 / 场景素材</span></p><h1><span data-ui="换一个角度">换一个角度</span><br><span data-ui="发现下一个镜头。">发现下一个镜头。</span></h1><label class="upload-area"><span data-ui="＋ 添加全景位置">＋ 添加全景位置</span><input id="upload" type="file" accept="image/png,image/jpeg,image/webp" hidden><small><span data-ui="PNG / JPG / WebP · 最大 30 MB">PNG / JPG / WebP · 最大 30 MB</span></small></label><label><span data-ui="当前位置">当前位置</span><select id="scene-select"></select></label><input id="scene-name" aria-label="位置名称" data-ui-aria-label="位置名称" maxlength="60"><button id="delete-scene"><span data-ui="删除此位置">删除此位置</span></button><strong id="source-name"><span data-ui="方位演示全景">方位演示全景</span></strong><p class="muted" id="source-info"><span data-ui="建议使用 2:1 等距柱状全景图。">建议使用 2:1 等距柱状全景图。</span></p><button id="demo"><span data-ui="添加演示位置">添加演示位置</span></button><hr><p class="eyebrow"><span data-ui="位置连接 / 漫游热点">位置连接 / 漫游热点</span></p><label><span data-ui="前往位置">前往位置</span><select id="target-scene"></select></label><button id="add-hotspot"><span data-ui="＋ 在画面中心添加热点">＋ 在画面中心添加热点</span></button><button id="arrival"><span data-ui="设为此位置的到达视角">设为此位置的到达视角</span></button><p class="muted"><span data-ui="先对准门口或通道，再添加热点。点击画面中的箭头即可前往。">先对准门口或通道，再添加热点。点击画面中的箭头即可前往。</span></p><div id="hotspot-list"></div><hr><p class="eyebrow"><span data-ui="02 / 取景参数">02 / 取景参数</span></p><label><span data-ui="输出画幅">输出画幅</span><select id="ratio"><option>16:9</option><option>9:16</option><option>3:4</option><option>1:1</option></select></label><label><span data-ui="水平角度">水平角度 </span><output id="yaw-value"></output><input id="yaw" type="range" min="0" max="359" step="1"></label><label><span data-ui="俯仰角度">俯仰角度 </span><output id="pitch-value"></output><input id="pitch" type="range" min="-85" max="85" step="1"></label><label><span data-ui="垂直视野">垂直视野 </span><output id="fov-value"></output><input id="fov" type="range" min="20" max="100" step="1"></label><button id="reset"><span data-ui="重置视角">重置视角</span></button><label class="check"><input id="guides" type="checkbox" checked><span data-ui="显示三分构图线">显示三分构图线</span></label><hr><p class="eyebrow"><span data-ui="03 / 输出画面">03 / 输出画面</span></p><label><span data-ui="输出长边">输出长边</span><select id="resolution"><option value="1920">1920 px</option><option value="3840">3840 px</option></select></label><p class="muted"><span data-ui="高分辨率导出不会增加原图细节。取景图片不包含辅助线。">高分辨率导出不会增加原图细节。取景图片不包含辅助线。</span></p></aside><main class="pano-stage"><div class="stage-top"><button id="demo-tour"><span data-ui="体验三点漫游">体验三点漫游</span></button><span><i></i><span data-ui="PANORAMA / 环视取景"> PANORAMA / 环视取景</span></span><span id="frame-spec">16:9</span></div><div id="viewport"><div id="frame"><div id="render-host"></div><div id="hotspots"></div><div id="grid"><i></i><i></i><i></i><i></i></div><span class="frame-corner tl"></span><span class="frame-corner tr"></span><span class="frame-corner bl"></span><span class="frame-corner br"></span></div></div><div class="stage-bottom"><p><span data-ui="拖拽环视 · 滚轮变焦 · 聚焦画面后方向键微调">拖拽环视 · 滚轮变焦 · 聚焦画面后方向键微调</span></p><div><button id="download"><span data-ui="导出当前画面">导出当前画面</span></button><button id="capture" class="primary"><span data-ui="＋ 保存取景">＋ 保存取景</span></button></div></div><p id="message" role="status"><span data-ui="图片仅保存在本机浏览器，不会上传至服务器。">图片仅保存在本机浏览器，不会上传至服务器。</span></p></main><aside class="pano-library"><div class="library-heading"><div><p class="eyebrow">SHOT COLLECTION</p><h2><span data-ui="取景库">取景库 </span><span id="count">00</span></h2></div></div><p class="muted"><span data-ui="点击画面恢复角度。最多保存 20 个取景。">点击画面恢复角度。最多保存 20 个取景。</span></p><div id="shots"></div></aside></div></div>`;
 const $ = (id) => document.getElementById(id);
 let tour = restoreTour(null);
 let viewer,
@@ -131,11 +133,9 @@ function saveBlob(blob, name) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 /** 解码本地图片并限制 GPU 纹理大小，原始文件继续保存在独立会话中。 */
-async function loadSource(blob) {
+async function prepareSource(blob) {
   if (!blob) {
-    viewer.setImage(demoPanorama());
-    $('source-info').innerHTML = uiText('方位演示图 · 2:1 等距柱状投影');
-    return;
+    return { image: demoPanorama(), info: '方位演示图 · 2:1 等距柱状投影' };
   }
   if (blob.size > 30 * 1024 * 1024 || !['image/png', 'image/jpeg', 'image/webp'].includes(blob.type))
     throw new Error('请选择 30 MB 内的 PNG、JPEG 或 WebP 图片');
@@ -148,12 +148,16 @@ async function loadSource(blob) {
     c.width = Math.round(bitmap.width * scale);
     c.height = Math.round(bitmap.height * scale);
     c.getContext('2d').drawImage(bitmap, 0, 0, c.width, c.height);
-    viewer.setImage(c);
-    $('source-info').textContent =
-      `${bitmap.width} × ${bitmap.height}${Math.abs(bitmap.width / bitmap.height - 2) > 0.1 ? ' · 非 2:1 图片，环视可能拉伸或出现接缝。' : ' · 等距柱状投影'}${scale < 1 ? ' · 预览已缩小' : ''}`;
+    return { image: c, info: `${bitmap.width} × ${bitmap.height}${Math.abs(bitmap.width / bitmap.height - 2) > 0.1 ? ' · 非 2:1 图片，环视可能拉伸或出现接缝。' : ' · 等距柱状投影'}${scale < 1 ? ' · 预览已缩小' : ''}` };
   } finally {
     bitmap.close();
   }
+}
+/** 素材准备成功后才替换画面，上传与演示入口共用相同校验。 */
+async function loadSource(blob) {
+  const prepared = await prepareSource(blob);
+  viewer.setImage(prepared.image);
+  $('source-info').textContent = prepared.info;
 }
 /** 更新热点在当前视角中的位置；热点只存在于界面，不进入导出图片。 */
 function positionHotspots() {
@@ -190,7 +194,7 @@ function renderTour() {
     button.dataset.id = hotspot.id;
     button.textContent = '➜ ' + target.name;
     button.title = '前往 ' + target.name;
-    button.onclick = () => switchScene(target.id, true);
+    button.onclick = () => switchScene(target.id, true, hotspot);
     $('hotspots').append(button);
     const row = document.createElement('div');
     const label = document.createElement('span');
@@ -209,28 +213,44 @@ function renderTour() {
   positionHotspots();
 }
 /** 解码完成后进入目标位置，失败时继续保留原来的场景和取景。 */
-async function switchScene(id, arrival = false) {
+async function switchScene(id, arrival = false, departure = null) {
   if (busy) return false;
   const next = tour.scenes.find((s) => s.id === id);
   if (!next) return false;
+  const original = { ...viewer.view };
+  let transition;
   busy = true;
   $('frame').classList.add('traveling');
   try {
-    if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
-      await new Promise(resolve => setTimeout(resolve, 180));
-    await loadSource(next.source);
+    // 解码与轻微转向并行；转向只影响预览，不写入出发位置的保存视角。
+    const [asset, approach] = await Promise.allSettled([
+      prepareSource(next.source),
+      departure ? approachHotspot(original, departure, view => viewer.setView({ ...original, ...view })) : Promise.resolve(),
+    ]);
+    if (asset.status === 'rejected') throw asset.reason;
+    if (approach.status === 'rejected') throw approach.reason;
+    const host = $('render-host'), point = departure && viewer.projectHotspot(departure);
+    transition = createSceneTransition(host, viewer.canvas, {
+      forward: Boolean(departure),
+      origin: point?.visible ? { x: point.x * host.clientWidth / 100, y: point.y * host.clientHeight / 100 } : null,
+    });
+    viewer.setImage(asset.value.image);
+    $('source-info').textContent = asset.value.info;
     state = next;
     tour.activeId = next.id;
     updateView(arrival ? { ...next.arrival, ratio: next.view.ratio } : next.view);
     renderTour();
     renderShots();
+    await transition.play();
     await persist();
     message('已到达：' + state.name);
     return true;
   } catch (e) {
+    if (state !== next) viewer.setView(original);
     message('无法进入位置：' + e.message);
     return false;
   } finally {
+    transition?.dispose();
     busy = false;
     $('frame').classList.remove('traveling');
     $('scene-select').value = state.id;
